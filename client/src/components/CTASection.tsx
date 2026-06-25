@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 
 /**
  * CTA Section Component
- * High-converting call-to-action layout matching slide 10 and 11 of the PDF
+ * Centered typography CTA block with gold and burgundy styling
  * Theme: Midnight Slate (#05080C) + Imperial Burgundy (#3B0527) + Gold (#E49F1B)
  */
 
@@ -12,7 +12,6 @@ export default function CTASection() {
   const { ref, inView } = useInView({ threshold: 0.25, triggerOnce: true });
 
   const handleAuditClick = () => {
-    // Open email link or initiate call
     window.location.href = 'mailto:chandrakanth102001@gmail.com?subject=Free Audit Request';
   };
 
@@ -23,10 +22,10 @@ export default function CTASection() {
   return (
     <section
       ref={ref}
-      className="py-32 px-4 bg-gradient-to-b from-[#05080C] via-[#3B0527]/25 to-[#05080C] relative overflow-hidden"
+      className="py-32 px-4 bg-gradient-to-b from-[#05080C] via-[#3B0527]/20 to-[#05080C] relative overflow-hidden"
     >
       {/* Background radial gradients */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-br from-[#3B0527]/30 to-transparent rounded-full blur-[140px]" />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-br from-[#3B0527]/25 to-transparent rounded-full blur-[140px] pointer-events-none" />
       
       <div className="max-w-4xl mx-auto relative z-10 text-center">
         {/* Main Heading - Serif */}

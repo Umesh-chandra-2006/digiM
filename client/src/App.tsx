@@ -6,7 +6,6 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import CustomCursor from "./components/CustomCursor";
-import SmoothScroll from "./components/SmoothScroll";
 
 function Router() {
   return (
@@ -32,16 +31,14 @@ function App() {
         // switchable
       >
         <TooltipProvider>
-          <SmoothScroll>
-            {/* Cinematic Noise Texture Overlay */}
-            <div className="noise-overlay" />
-            
-            {/* Custom Interactive Cursor */}
-            <CustomCursor />
-            
-            <Toaster />
-            <Router />
-          </SmoothScroll>
+          {/* Cinematic Noise Texture Overlay */}
+          <div className="noise-overlay" />
+          
+          {/* Custom Interactive Cursor */}
+          <CustomCursor />
+          
+          <Toaster />
+          <Router />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -6,96 +6,44 @@ import * as THREE from 'three';
 import { motion } from 'framer-motion';
 
 /**
- * Advanced Hero 3D Scene Component
- * Interactive WebGL particle field with scroll depth zoom & bloom shaders
+ * Advanced Hero 3D Scene Component - HIGH PERFORMANCE OPTIMIZED
+ * Interactive WebGL particle field with scroll depth zoom & bloom shaders.
+ * Optimized: Animates parent transforms instead of vertex buffer loops to ensure 60fps smooth scrolling.
  * Theme: Midnight Slate (#05080C) + Liquid Gold (#E49F1B) + Burgundy (#3B0527)
  */
 
 function InteractiveParticles() {
   const pointsRef = useRef<THREE.Points>(null);
-  const count = 2200;
+  const count = 1500; // Optimized particle count
 
-  // Generate spherical coordinate field
-  const [positions, initialPositions, speeds] = useMemo(() => {
+  // Generate static spherical coordinate field once
+  const positions = useMemo(() => {
     const pos = new Float32Array(count * 3);
-    const init = new Float32Array(count * 3);
-    const spd = new Float32Array(count);
-    
     for (let i = 0; i < count; i++) {
       const u = Math.random();
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
       const phi = Math.acos(2.0 * v - 1.0);
-      const r = 2.5 + Math.random() * 1.5; // Radius range
+      const r = 2.5 + Math.random() * 2.0; // Radius range
 
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-
-      pos[i * 3] = x;
-      pos[i * 3 + 1] = y;
-      pos[i * 3 + 2] = z;
-
-      init[i * 3] = x;
-      init[i * 3 + 1] = y;
-      init[i * 3 + 2] = z;
-
-      spd[i] = 0.4 + Math.random() * 1.2;
+      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      pos[i * 3 + 2] = r * Math.cos(phi);
     }
-    return [pos, init, spd];
+    return pos;
   }, []);
 
   useFrame((state) => {
     const time = state.clock.getElapsedTime();
-    const mouse = state.mouse; 
     const scrollY = window.scrollY;
     
     if (pointsRef.current) {
-      const geometry = pointsRef.current.geometry as THREE.BufferGeometry;
-      const positionsAttr = geometry.attributes.position as THREE.BufferAttribute;
+      // Dynamic camera travel depth on scroll (flies past camera) - runs purely on GPU
+      pointsRef.current.position.z = scrollY * 0.0055;
       
-      // Calculate mouse in 3D world approximation
-      const mx = mouse.x * 4;
-      const my = mouse.y * 4;
-
-      for (let i = 0; i < count; i++) {
-        const i3 = i * 3;
-        
-        // Base coordinate
-        const ix = initialPositions[i3];
-        const iy = initialPositions[i3 + 1];
-        const iz = initialPositions[i3 + 2];
-
-        // Cosmic wave breathing motion
-        const waveForce = Math.sin(time * speeds[i] * 0.4 + ix) * 0.15;
-        
-        // Mouse push effect
-        const dx = positionsAttr.array[i3] - mx;
-        const dy = positionsAttr.array[i3 + 1] - my;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        let repelX = 0;
-        let repelY = 0;
-        
-        if (dist < 2.0) {
-          const force = (2.0 - dist) * 0.12;
-          repelX = dx * force;
-          repelY = dy * force;
-        }
-
-        // Apply positions
-        positionsAttr.array[i3] += (ix + repelX - positionsAttr.array[i3]) * 0.08;
-        positionsAttr.array[i3 + 1] += (iy + repelY - positionsAttr.array[i3 + 1]) * 0.08;
-        positionsAttr.array[i3 + 2] += (iz + waveForce - positionsAttr.array[i3 + 2]) * 0.08;
-      }
-      
-      positionsAttr.needsUpdate = true;
-      
-      // Dynamic zoom on scroll (flying past camera)
-      pointsRef.current.position.z = scrollY * 0.0065;
-      // Auto-rotation accelerated by scroll
-      pointsRef.current.rotation.y = time * 0.08 + scrollY * 0.0015;
-      pointsRef.current.rotation.x = time * 0.03 + scrollY * 0.0005;
+      // Auto-rotation of entire particle system
+      pointsRef.current.rotation.y = time * 0.05 + scrollY * 0.001;
+      pointsRef.current.rotation.x = time * 0.02 + scrollY * 0.0003;
     }
   });
 
@@ -108,7 +56,7 @@ function InteractiveParticles() {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.055}
+        size={0.05}
         color="#E49F1B" // Liquid Gold
         sizeAttenuation
         transparent
@@ -136,13 +84,13 @@ function Scene() {
       {/* Postprocessing Shaders for Glow Effect */}
       <EffectComposer>
         <Bloom 
-          intensity={1.5} 
-          luminanceThreshold={0.12} 
-          luminanceSmoothing={0.95} 
+          intensity={1.3} 
+          luminanceThreshold={0.15} 
+          luminanceSmoothing={0.9} 
           mipmapBlur 
         />
         <ChromaticAberration 
-          offset={new THREE.Vector2(0.0015, 0.0015)} 
+          offset={new THREE.Vector2(0.0012, 0.0012)} 
         />
       </EffectComposer>
 
@@ -150,7 +98,7 @@ function Scene() {
         enableZoom={false}
         enablePan={false}
         autoRotate
-        autoRotateSpeed={0.6}
+        autoRotateSpeed={0.5}
         maxPolarAngle={Math.PI / 1.8}
         minPolarAngle={Math.PI / 2.2}
       />
@@ -177,15 +125,15 @@ export default function Hero3DScene() {
       {/* 3D Canvas Background */}
       <Canvas
         className="absolute inset-0 z-0"
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: false }}
+        dpr={[1, 1.5]} // Performance optimized dpr cap
+        gl={{ antialias: false, alpha: false }} // Performance optimized gl flags
       >
         <Scene />
       </Canvas>
 
       {/* Grid Pattern overlay */}
       <div 
-        className="absolute inset-0 pointer-events-none opacity-[0.035]"
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
           backgroundImage: `linear-gradient(to right, #E49F1B 1px, transparent 1px), linear-gradient(to bottom, #E49F1B 1px, transparent 1px)`,
           backgroundSize: '50px 50px'
